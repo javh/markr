@@ -9,7 +9,7 @@ input to [MkDocs](http://www.mkdocs.org).
 devtools::install_bitbucket("javh/markr@default")
 ```
 
-## What is does
+## What it does
 
 * Parses the README.md, DESCRIPTION, and inst/CITATION files in your package to generate
   the **Introduction** page (index.md).
@@ -22,7 +22,7 @@ devtools::install_bitbucket("javh/markr@default")
   the **Package Overview** page.
 * Generates a `mkdocs.yml` config file.
 
-## How to use
+## How to use it
 
 Run this from your package source directory, where `package` is the name of your package:
 
