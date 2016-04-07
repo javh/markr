@@ -1,0 +1,26 @@
+Package: markr
+Version: 0.1.0
+Title: Make MkDocs Documentation for a Package
+Description: Converts Rd files to markdown, runs examples, knits vignettes, and parses
+             information from the README, DESCRIPTION and CITATION files to build
+             package documentation that can be build with MkDocs.
+Authors@R: c(person("Jason", "Vander Heiden", role=c("aut", "cre"),
+                    email="jason.vanderheiden@yale.edu"),
+             person("Hadley", "Wickham", role=c("cbt"),
+                    email="hadley@rstudio.com"))
+License: MIT
+Imports:
+    stringr,
+    evaluate,
+    whisker,
+    highlight,
+    tools,
+    markdown,
+    devtools (>= 0.8),
+    digest,
+    grid,
+    crayon
+Suggests:
+    knitr
+VignetteBuilder: knitr
+RoxygenNote: 5.0.1
