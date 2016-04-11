@@ -6,7 +6,7 @@ Description: Converts Rd files to markdown, runs examples, knits vignettes, and 
              package documentation that can be build with MkDocs.
 Authors@R: c(person("Jason", "Vander Heiden", role=c("aut", "cre"),
                     email="jason.vanderheiden@yale.edu"),
-             person("Hadley", "Wickham", role=c("cbt"),
+             person("Hadley", "Wickham", role=c("ctb"),
                     email="hadley@rstudio.com"))
 License: MIT
 Imports:
