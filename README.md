@@ -50,9 +50,10 @@ select "MkDocs" as the documentation type within settings
 
 ## Examples
 
-These docs: [Alakazam](http://alakazam.readthedocs.org)  
-Are built from this repo: [prototype-docs](https://bitbucket.org/javh/prototype-docs)  
-Whose docs are built from these commands: [build_docs.R](https://bitbucket.org/javh/prototype-docs/src/tip/R/build_docs.R)  
+These [docs](http://alakazam.readthedocs.org)  
+Are built from this [repo](https://bitbucket.org/kleinstein/alakazam)  
+Whose docs are built from [these commands](https://bitbucket.org/kleinstein/alakazam/src/tip/inst/markr/build.R)  
+Supplemented with one manually created [file](https://bitbucket.org/kleinstein/alakazam/src/tip/docs/install.md)
 
 ## Limitations
 
@@ -62,7 +63,8 @@ with a few exceptions:
 * `devtools::load_all()` and `knitr::knit()` don't seem to be friends. For now, you
   *must* `library()` your package before building the docs so the examples work.
 * Does not currently support the `\code{\link{}}` syntax.  Just use `\link{}` instead. 
-  Note, this also means roxygen `@family` tags won't render correctly.
+  Note, this also means roxygen `@family` tags won't render correctly, nor will linking to
+  an external package in roxygen via `\link[package]{topic}`.
 * Does not currently support demos.
 * MathJax is currently disabled, as it requires the 
   [python markdown math extension](https://github.com/mitya57/python-markdown-math).

@@ -6,10 +6,9 @@ Description
 {{{ description }}}
 {{/description}}
 
+{{#usage}}
 Usage
 --------------------
-
-{{#usage}}
 {{{usage}}}
 {{/usage}}
 

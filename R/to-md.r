@@ -37,14 +37,14 @@ to_md.Rd_doc <- function(x, ...) {
 
   out$usage <- to_md(get_tag("usage"), ...)
   out$arguments <- to_md(get_tag("arguments"), ...)
-  if (length(out$arguments)) {
-    out$has_args <- TRUE # Work around mustache deficiency
-  }
-  out$author <- to_md(get_tag("author"), ...)
 
+  # Work around mustache deficiency
+  if (length(out$usage)) { out$has_usage <- TRUE }
+  if (length(out$arguments)) { out$has_args <- TRUE }
+
+  out$author <- to_md(get_tag("author"), ...)
   out$seealso <- to_md(get_tag("seealso"), ...)
   out$examples <- to_md(get_tag("examples"), ...)
-
 
   # Everything else stays in original order, and becomes a list of sections.
   sections <- x[!(tags %in% c("name", "title", "description", "alias", "keyword",
@@ -146,14 +146,10 @@ to_md.description <- function(x, ...) {
 #' @export
 to_md.value <- function(x, ...) {
   # Note that \value is implicitly a \describe environment
-  class(x) <- c("describe", class(x))
-
-  text <- to_md(x, ...)
-  #paras <- stringr::str_trim(stringr::str_split(text, "\\n\\s*\\n")[[1]])
-  #paras <- stringr::str_replace_all(text, "\\n\\s+", "\n")
-  #print(paras)
-
-  #list(title = "Value", contents = paras)
+  #class(x) <- c("describe", class(x))
+  #text <- to_md(x, ...)
+  #list(title = "Value", contents = text)
+  text <- to_md.TEXT(x, ...)
   list(title = "Value", contents = text)
 }
 
@@ -446,7 +442,7 @@ to_md.enumerate <- function(x, ...) {
 }
 #' @export
 to_md.describe <- function(x, ...) {
-  stringr::str_c("\n", parse_descriptions_md(x[-1], ...), "")
+  stringr::str_c("\n", parse_describe_md(x[-1], ...), "")
 }
 
 parse_itemize_md <- function(rd, ...) {
@@ -485,14 +481,14 @@ parse_enumerate_md <- function(rd, ...) {
   stringr::str_c(li, collapse = "")
 }
 
-parse_descriptions_md <- function(rd, ...) {
+parse_describe_md <- function(rd, ...) {
   is_item <- vapply(rd, function(x) tag(x) == "item",
                     FUN.VALUE = logical(1))
 
   li <- character(length(rd))
   for (i in seq_along(rd)) {
     if (is_item[[i]]) {
-      li[i] <- stringr::str_c(to_md.TEXT(rd[[i]][[1]], ...), "\n", to_md.TEXT(rd[[i]][-1], ...), "\n")
+      li[i] <- stringr::str_c(to_md.TEXT(rd[[i]][[1]], ...), "\n:   ", to_md.TEXT(rd[[i]][-1], ...))
     } else {
       li[i] <- to_md.TEXT(rd[i], ...)
     }
@@ -500,6 +496,7 @@ parse_descriptions_md <- function(rd, ...) {
 
   stringr::str_c(li, collapse = "")
 }
+
 
 # Simple tags that need minimal processing -----------------------------------
 
