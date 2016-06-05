@@ -331,11 +331,16 @@ build_yaml <- function(pkg) {
   # Add topics
   topics <- sapply(topic_table$file_out, function(x) { str_c(i, i, "- ", file.path("topics", x)) })
 
+  if (length(vignettes) > 0) {
+    yaml <- c(yaml,
+              str_c(i, "- Vignettes:"),
+              vignettes)
+  }
+
   yaml <- c(yaml,
-            str_c(i, "- Vignettes:"),
-            vignettes,
             str_c(i, "- Help Topics:"),
             topics)
+
 
   writeLines(yaml, file.path(pkg$site_path, "..", "mkdocs.yml"))
 }
