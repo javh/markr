@@ -32,6 +32,7 @@ build_mkdocs <- function(pkg=".", doc_path=NULL, yaml=FALSE, ...) {
 
   pkg$topics <- build_md_topics(pkg)
   pkg$vignettes <- build_md_vignettes(pkg)
+  pkg$news <- build_md_news(pkg)
   pkg$index <- build_md_index(pkg)
 
   if (yaml) { build_yaml(pkg) }
@@ -200,6 +201,51 @@ load_md_readme <- function(pkg = ".", ...) {
   return(readme)
 }
 
+#' Load NEWS into a string vector
+#'
+#' @param pkg path to source version of package.  See
+#'   \code{\link[devtools]{as.package}} for details on how paths and package
+#'   names are resolved.
+#' @param ... Other additional arguments passed to \code{\link{as.sd_package}}
+#'   used to override package defaults.
+#'
+#' @export
+load_md_news <- function(pkg = ".", ...) {
+    pkg <- as.sd_package(pkg, ...)
+
+    # Use NEWS.md from package root if it exists, otherwise NULL
+    f <- file.path(pkg$path, "NEWS.md")
+    news <- if (file.exists(f)) { readLines(f) } else { NULL }
+
+    return(news)
+}
+
+
+#' Build release notes page
+#'
+#' Must be called after everything else.
+#'
+#' @param  pkg   path to source version of package.
+#'
+#' @export
+build_md_news <- function(pkg) {
+    outfile <- file.path(pkg$site_path, "news.md")
+    message("Generating news.md")
+
+    # Load NEWS
+    news <- load_md_news(pkg)
+
+    # Write
+    if (!is.null(news)) {
+        writeLines(news, outfile)
+    } else {
+        outfile <- NULL
+    }
+
+    invisible(outfile)
+}
+
+
 #' Build home page
 #'
 #' Must be called after everything else.
@@ -318,9 +364,14 @@ build_yaml <- function(pkg) {
             str_c(i, i, i, "permalink: True"),
             str_c("docs_dir: ", basename(pkg$site_path)),
             "pages:",
-            str_c(i, "- About:"),
-            str_c(i, i, "- Introduction: index.md"),
-            str_c(i, i, "- Package Overview: topics/", pkg$package, ".md"))
+            str_c(i, "- 'About':"),
+            str_c(i, i, "- 'Introduction': index.md"),
+            str_c(i, i, "- 'Package Overview': topics/", pkg$package, ".md"))
+
+  # Add NEWS if it exists
+  if (!is.null(pkg$news)) {
+      yaml <- c(yaml, str_c(i, i, "- 'Release Notes': news.md"))
+  }
 
   # Add vignettes
   vignettes <- mapply(function(x, y) { str_c(i, i, "- '", x, "': ", file.path("vignettes", y)) },
@@ -333,12 +384,12 @@ build_yaml <- function(pkg) {
 
   if (length(vignettes) > 0) {
     yaml <- c(yaml,
-              str_c(i, "- Vignettes:"),
+              str_c(i, "- 'Vignettes':"),
               vignettes)
   }
 
   yaml <- c(yaml,
-            str_c(i, "- Help Topics:"),
+            str_c(i, "- 'Help Topics':"),
             topics)
 
 
