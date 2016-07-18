@@ -133,7 +133,7 @@ build_md_vignettes <- function(pkg=".", doc_path=NULL,  ...) {
       #opts_chunk$set(fig.path="figures/")
       #rmarkdown::render(d, output_file=outfile, output_dir=o, intermediates_dir=o,
       #                  md_document(variant="markdown", preserve_yaml=FALSE))
-      knit(d, output=outfile, quiet=FALSE)
+      knit(d, output=outfile, quiet=FALSE, envir=globalenv())
       return(outfile)
     } else {
       return(FALSE)
