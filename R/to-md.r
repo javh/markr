@@ -154,10 +154,7 @@ to_md.value <- function(x, ...) {
 }
 
 #' @export
-to_md.references <- function(x, ...) {
-  #stringr::str_c("\nREFERENCES_START\n", parse_section_md(x, "References", ...), "\nREFERENCES_END\n\n")
-  parse_section_md(x, "References", ...)
-}
+to_md.references <- function(x, ...) { parse_section_md(x, "References", ...) }
 
 #' @export
 to_md.source <- function(x, ...) parse_section_md(x, "Source", ...)

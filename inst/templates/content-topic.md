@@ -23,12 +23,25 @@ Arguments
 {{/arguments}}
 {{/has_args}}
 
+{{#details}}
+Details
+-------------------
+{{{ details }}}
+{{/details}}
+
+{{#format}}
+Format
+-------------------
+{{{ format }}}
+{{/format}}
+
 {{#sections}}
 {{{title}}}
 -------------------
 {{#contents}}
 {{{.}}}
 {{/contents}}
+
 {{/sections}}
 
 {{#examples}}
@@ -43,8 +56,20 @@ See also
 {{{ seealso }}}
 {{/seealso}}
 
+{{#references}}
+References
+-------------------
+{{{ references }}}
+{{/references}}
+
 {{#author}}
 Author
 -------------------
 {{{ author }}}
 {{/author}}
+
+{{#note}}
+Note
+-------------------
+{{{ note }}}
+{{/note}}
