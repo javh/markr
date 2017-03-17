@@ -301,14 +301,12 @@ to_md.link <- function(x, pkg, ...) {
 make_md_link <- function(loc, label, pkg = NULL) {
   if (is.null(loc$package)) {
     str_c("[", label, "](", str_replace(loc$file, "\\.html$", "\\.md"), ")")
-  } else if (loc$package %in% builtin_packages) {
-    str_c("[", label, "](http://www.inside-r.org/r-doc/", loc$package,
-          "/", loc$topic, ")")
   } else {
-    str_c("[", label, "](http://www.inside-r.org/packages/cran/", loc$package,
-          "/docs/", loc$topic, ")")
+    str_c("[", label, "](http://www.rdocumentation.org/packages/", loc$package,
+          "/topics/", loc$topic, ")")
   }
 }
+
 
 builtin_packages <- c("base", "boot", "class", "cluster", "codetools", "compiler",
                       "datasets", "foreign", "graphics", "grDevices", "grid", "KernSmooth",
