@@ -21,7 +21,7 @@
 #' @import stringr
 #' @importFrom devtools load_all
 #' @export
-build_sphinx <- function(pkg=".", doc_path=NULL, ...) {
+build_rst <- function(pkg=".", doc_path=NULL, ...) {
   # Make doc directory
   if (!file.exists(doc_path)) {
     dir.create(doc_path, recursive = TRUE)

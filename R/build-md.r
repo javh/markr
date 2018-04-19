@@ -15,19 +15,17 @@
 #'                    \code{NULL} this defaults to \code{pkg}/docs.
 #' @param  yaml       if \code{TRUE} generate the \code{mkdocs.yml} file in the parent
 #'                    directory of \code{doc_path}.
-#' @param  ...        Other additional arguments passed to \code{\link{as.sd_package}}
-#'                    used to override package defaults.
 #'
 #' @import stringr
 #' @importFrom devtools load_all
 #' @export
-build_mkdocs <- function(pkg=".", doc_path=NULL, yaml=FALSE, ...) {
+build_mkdocs <- function(pkg=".", doc_path=NULL, yaml=FALSE) {
   # Make doc directory
   if (!file.exists(doc_path)) {
     dir.create(doc_path, recursive = TRUE)
   }
 
-  pkg <- as.sd_package(pkg, site_path=doc_path, mathjax=FALSE, ...)
+  pkg <- as.sd_package(pkg, site_path=doc_path, mathjax=FALSE)
   #load_all(pkg)
 
   pkg$topics <- build_md_topics(pkg)
@@ -38,6 +36,32 @@ build_mkdocs <- function(pkg=".", doc_path=NULL, yaml=FALSE, ...) {
   if (yaml) { build_yaml(pkg) }
 
   invisible(TRUE)
+}
+
+
+#' Build complete sphinx (recommonmark) documentation for a package.
+#'
+#' @export
+build_sphinx <- function(pkg=".", doc_path=NULL) {
+    # Check arguments
+    style <- "sphinx"
+
+    # Make doc directory
+    if (!file.exists(doc_path)) {
+        dir.create(doc_path, recursive = TRUE)
+    }
+
+    pkg <- as.sd_package(pkg, site_path=doc_path, mathjax=FALSE)
+    #load_all(pkg)
+
+    pkg$topics <- build_md_topics(pkg, style=style)
+    pkg$vignettes <- build_md_vignettes(pkg)
+    # pkg$news <- build_md_news(pkg)
+    # pkg$index <- build_md_index(pkg)
+    #
+    # if (yaml) { build_yaml(pkg) }
+
+    invisible(TRUE)
 }
 
 
@@ -52,46 +76,49 @@ build_mkdocs <- function(pkg=".", doc_path=NULL, yaml=FALSE, ...) {
 #'   used to override package defaults.
 #'
 #' @export
-build_md_topics <- function(pkg=".", doc_path=NULL, ...) {
-  #load_all(pkg)
-  pkg <- as.sd_package(pkg, site_path=doc_path, mathjax=FALSE, ...)
+build_md_topics <- function(pkg=".", doc_path=NULL, style=c("mkdocs", "sphinx")) {
+    # Check arguments
+    style <- match.arg(style)
 
-  # for each file, find name of one topic
-  index <- pkg$rd_index
-  index$file_out <- str_replace(index$file_out, "\\.html$", ".md")
-  paths <- file.path(pkg$site_path, "topics", index$file_out)
+    #load_all(pkg)
+    pkg <- as.sd_package(pkg, site_path=doc_path, mathjax=FALSE)
 
-  ## output path for all topics,
-  pkg$topic_path = file.path(pkg$site_path, "topics")
-  if(!file.exists(pkg$topic_path)) {
-    dir.create(pkg$topic_path, recursive = TRUE)
-  }
+    # for each file, find name of one topic
+    index <- pkg$rd_index
+    index$file_out <- str_replace(index$file_out, "\\.html$", ".md")
+    paths <- file.path(pkg$site_path, "topics", index$file_out)
 
-  # create columns for extra topic info
-  index$title <- ""
-  index$in_index <- TRUE
-
-  for (i in seq_along(index$name)) {
-    message("Generating ", basename(paths[[i]]))
-
-    rd <- pkg$rd[[i]]
-    md <- to_md.Rd_doc(rd,
-                       env = new.env(parent = globalenv()),
-                       topic = stringr::str_replace(basename(paths[[i]]), "\\.md$", ""),
-                       pkg = pkg)
-    md$pagetitle <- md$name
-
-    md$package <- pkg[c("package", "version")]
-    render_md_page(pkg, "topic", md, paths[[i]])
-    graphics.off()
-
-    if ("internal" %in% md$keywords) {
-      index$in_index[i] <- FALSE
+    ## output path for all topics,
+    pkg$topic_path = file.path(pkg$site_path, "topics")
+    if(!file.exists(pkg$topic_path)) {
+        dir.create(pkg$topic_path, recursive = TRUE)
     }
-    index$title[i] <- md$title
-  }
 
-  index
+    # create columns for extra topic info
+    index$title <- ""
+    index$in_index <- TRUE
+
+    for (i in seq_along(index$name)) {
+        message("Generating ", basename(paths[[i]]))
+
+        rd <- pkg$rd[[i]]
+        md <- to_md.Rd_doc(rd,
+                           env = new.env(parent = globalenv()),
+                           topic = stringr::str_replace(basename(paths[[i]]), "\\.md$", ""),
+                           pkg = pkg)
+        md$pagetitle <- md$name
+
+        md$package <- pkg[c("package", "version")]
+        render_md_page(md, style=style, path=paths[[i]])
+        graphics.off()
+
+        if ("internal" %in% md$keywords) {
+            index$in_index[i] <- FALSE
+        }
+        index$title[i] <- md$title
+    }
+
+    index
 }
 
 

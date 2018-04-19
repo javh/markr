@@ -121,7 +121,7 @@ to_rst.keyword <- function(x, ...) unlist(to_rst.list(x, ...))
 #' @export
 to_rst.seealso <- function(x, ...) {
   #to_rst.TEXT(x, ...)
-  parse_section_md(x, "Seealso", ...)[[2]]
+  parse_section_rst(x, "Seealso", ...)[[2]]
 }
 
 #' @export
@@ -132,14 +132,14 @@ to_rst.author <- function(x, ...) to_rst.TEXT(x, ...)
 # contains a list of paragraphs.
 #' @export
 to_rst.details <- function(x, ...) {
-  #stringr::str_c("\nDETAILS_START\n", parse_section_md(x, "Details", ...), "\nDETAILS_END\n\n")
-  parse_section_md(x, "Details", ...)
+  #stringr::str_c("\nDETAILS_START\n", parse_section_rst(x, "Details", ...), "\nDETAILS_END\n\n")
+  parse_section_rst(x, "Details", ...)
 }
 
 #' @export
 to_rst.description <- function(x, ...) {
   to_rst.TEXT(x, ...)
-  #parse_section_md(x, "Description", ...)
+  #parse_section_rst(x, "Description", ...)
 }
 
 #' @export
@@ -153,23 +153,23 @@ to_rst.value <- function(x, ...) {
 }
 
 #' @export
-to_rst.references <- function(x, ...) { parse_section_md(x, "References", ...) }
+to_rst.references <- function(x, ...) { parse_section_rst(x, "References", ...) }
 
 #' @export
-to_rst.source <- function(x, ...) parse_section_md(x, "Source", ...)
+to_rst.source <- function(x, ...) parse_section_rst(x, "Source", ...)
 
 #' @export
-to_rst.format <- function(x, ...) parse_section_md(x, "Format", ...)
+to_rst.format <- function(x, ...) parse_section_rst(x, "Format", ...)
 
 #' @export
-to_rst.note <- function(x, ...) parse_section_md(x, "Note", ...)
+to_rst.note <- function(x, ...) parse_section_rst(x, "Note", ...)
 
 #' @export
 to_rst.section <- function(x, ...) {
-  parse_section_md(x[[2]], to_rst(x[[1]], ...), ...)
+  parse_section_rst(x[[2]], to_rst(x[[1]], ...), ...)
 }
 
-parse_section_md <- function(x, title, ...) {
+parse_section_rst <- function(x, title, ...) {
   text <- to_rst.TEXT(x, ...)
   #paras <- stringr::str_trim(stringr::str_split(text, "\\n\\s*\\n")[[1]])
   #paras <- stringr::str_replace_all(text, "\\n\\s+", "\n")
@@ -200,7 +200,7 @@ to_rst.examples <- function(x, pkg, topic = "unknown", env = new.env(parent = gl
   text <- str_trim(to_rst.TEXT(x[-1], ...))
   expr <- evaluate(text, env, new_device = TRUE)
 
-  replay_md(expr, pkg = pkg, name = str_c(topic, "-"))
+  replay_rst(expr, pkg = pkg, name = str_c(topic, "-"))
 }
 
 # Arguments ------------------------------------------------------------------
@@ -428,18 +428,18 @@ to_rst.cr <- function(x, ...) character(0)
 
 #' @export
 to_rst.itemize <- function(x, ...) {
-  stringr::str_c("\n", parse_itemize_md(x[-1], ...), "")
+  stringr::str_c("\n", parse_itemize_rst(x[-1], ...), "")
 }
 #' @export
 to_rst.enumerate <- function(x, ...) {
-  stringr::str_c("\n", parse_enumerate_md(x[-1], ...), "")
+  stringr::str_c("\n", parse_enumerate_rst(x[-1], ...), "")
 }
 #' @export
 to_rst.describe <- function(x, ...) {
-  stringr::str_c("\n", parse_describe_md(x[-1], ...), "")
+  stringr::str_c("\n", parse_describe_rst(x[-1], ...), "")
 }
 
-parse_itemize_md <- function(rd, ...) {
+parse_itemize_rst <- function(rd, ...) {
   separator <- vapply(rd, function(x) tag(x) == "item",
                       FUN.VALUE = logical(1))
   group <- cumsum(separator)
@@ -457,7 +457,7 @@ parse_itemize_md <- function(rd, ...) {
   stringr::str_c(li, collapse = "")
 }
 
-parse_enumerate_md <- function(rd, ...) {
+parse_enumerate_rst <- function(rd, ...) {
   separator <- vapply(rd, function(x) tag(x) == "item",
                       FUN.VALUE = logical(1))
   group <- cumsum(separator)
@@ -475,7 +475,7 @@ parse_enumerate_md <- function(rd, ...) {
   stringr::str_c(li, collapse = "")
 }
 
-parse_describe_md <- function(rd, ...) {
+parse_describe_rst <- function(rd, ...) {
   is_item <- vapply(rd, function(x) tag(x) == "item",
                     FUN.VALUE = logical(1))
 
@@ -500,13 +500,13 @@ to_rst.Rd_content <- function(x, ...) {
 
   if (is.null(tag)) {
     to_rst.TEXT(x, ...)
-  } else if (!is.null(tag) && tag %in% names(simple_md_tags)) {
+  } else if (!is.null(tag) && tag %in% names(simple_rst_tags)) {
     #cat("TAG: ", tag, "\n")
     #print(x)
 
     # If we can process tag with just prefix & suffix, do so
-    md <- simple_rst_tags[[tag]]
-    stringr::str_c(md[1], to_rst.TEXT(x, ...), md[2])
+    rst <- simple_rst_tags[[tag]]
+    stringr::str_c(rst[1], to_rst.TEXT(x, ...), rst[2])
   } else {
     # Otherwise we don't know about this tag
     message("Unknown tag: ", tag)

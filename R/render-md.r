@@ -6,46 +6,39 @@
 #' @param path Location to create file. If \code{""} (the default),
 #'   prints to standard out.
 #' @export
-render_md_page <- function(package, name, data, path = "") {
-  # render template components
-  pieces <- c("head", "navbar", "header", "content", "footer")
-  components <- lapply(pieces, render_md_template, package = package, name, data)
-  names(components) <- pieces
+render_md_page <- function(data, style, path="") {
+    # render template components
+    pieces <- c("header", "content", "footer")
+    components <- lapply(pieces, render_md_template, style=style, data=data)
+    names(components) <- pieces
 
-  # render complete layout
-  out <- render_md_template(package, "layout", name, components)
-  cat(out, file = path)
+    # render complete layout
+    out <- render_md_template("layout", style=style, data=components)
+    cat(out, file=path)
 }
 
 #' @importFrom whisker whisker.render
-render_md_template <- function(package, type, name, data) {
-  template <- readLines(find_md_template(package, type, name))
-  if (length(template) == 0 || (length(template) == 1 && str_trim(template) == ""))
-    return("")
+render_md_template <- function(section, style, data) {
+    template <- readLines(find_md_template(section, style))
+    if (length(template) == 0 || (length(template) == 1 && str_trim(template) == "")) {
+        return("")
+    }
 
-  whisker.render(template, data)
+    return(whisker.render(template, data))
 }
 
-# Find template by looking first in package/staticdocs then in
-# staticdocs/templates, trying first for a type-name.html otherwise
-# defaulting to type.html
-find_md_template <- function(package, type, name) {
-  paths <- c(
-    pkg_sd_path(package),
-    file.path(inst_path(), "templates")
-  )
+# Find template file for layout section
+find_md_template <- function(section, style) {
+    ## DEBUG
+    # style="mkdocs"; section="header"
+    template_path <- file.path(system.file(package="markr"), "templates")
+    template_file <- file.path(template_path, paste0(style, "-", section, ".md"))
 
-  if (!is.null(package$templates_path))
-    paths <- c(package$templates_path, paths)
+    if (!file.exists(template_file)) {
+        stop("Template file for style=", style, " and section=", section, "not found")
+    }
 
-  names <- c(
-    str_c(type, "-", name, ".md"),
-    str_c(type, ".md")
-  )
-
-  locations <- as.vector(t(outer(paths, names, FUN = "file.path")))
-  Find(file.exists, locations, nomatch =
-         stop("Can't find template for ", type, "-", name, ".", call. = FALSE))
+    return(template_file)
 }
 
 

@@ -1,7 +1,3 @@
-{{{ head }}}
-
-{{{ navbar }}}
-
 {{{ header }}}
 
 {{{ content }}}

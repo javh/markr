@@ -1,20 +1,17 @@
-**{{{name}}}** - *{{{title}}}*
-
 {{#description}}
-Description
---------------------
+### Description
+
 {{{ description }}}
 {{/description}}
 
 {{#usage}}
-Usage
---------------------
+### Usage
+
 {{{usage}}}
 {{/usage}}
 
 {{#has_args}}
-Arguments
--------------------
+### Arguments
 
 {{#arguments}}
 {{name}}
@@ -24,20 +21,20 @@ Arguments
 {{/has_args}}
 
 {{#details}}
-Details
--------------------
+### Details
+
 {{{ details }}}
 {{/details}}
 
 {{#format}}
-Format
--------------------
+### Format
+
 {{{ format }}}
 {{/format}}
 
 {{#sections}}
-{{{title}}}
--------------------
+### {{{title}}}
+
 {{#contents}}
 {{{.}}}
 {{/contents}}
@@ -45,31 +42,31 @@ Format
 {{/sections}}
 
 {{#examples}}
-Examples
--------------------
+### Examples
+
 {{{ examples }}}
 {{/examples}}
 
 {{#seealso}}
-See also
--------------------
+### See also
+
 {{{ seealso }}}
 {{/seealso}}
 
 {{#references}}
-References
--------------------
+### References
+
 {{{ references }}}
 {{/references}}
 
 {{#author}}
-Author
--------------------
+### Author
+
 {{{ author }}}
 {{/author}}
 
 {{#note}}
-Note
--------------------
+### Note
+
 {{{ note }}}
 {{/note}}
