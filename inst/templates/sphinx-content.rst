@@ -15,8 +15,8 @@ Arguments
 -------------------
 
 {{#arguments}}
-{{name}}
-:   {{{description}}}
+:{{name}}:
+    {{{description}}}
 
 {{/arguments}}
 {{/has_args}}

@@ -79,7 +79,7 @@ to_rst.concept <- function(x, ...) character(0)
 # Also need to do html escaping here and in to_rst.RCODE
 #' @export
 to_rst.TEXT <- function(x, ...) {
-  str_replace_all(str_c(unlist(to_rst.list(x, ...)), collapse = ""), "^ {2,}", "")
+    str_replace_all(str_c(unlist(to_rst.list(x, ...)), collapse = ""), "^ {2,}", "")
 }
 #' @export
 to_rst.RCODE <- to_rst.TEXT
@@ -217,7 +217,7 @@ to_rst.item <- function(x, ...) {
   # is dealt with those methods
   if (length(x) == 0) return()
 
-  list(name = to_rst(x[[1]], ...), description = to_rst.TEXT(x[[2]], ...))
+ list(name = to_rst(x[[1]], ...), description = to_rst.TEXT(x[[2]], ...))
 }
 
 # Equations ------------------------------------------------------------------
@@ -482,7 +482,7 @@ parse_describe_rst <- function(rd, ...) {
   li <- character(length(rd))
   for (i in seq_along(rd)) {
     if (is_item[[i]]) {
-      li[i] <- stringr::str_c(to_rst.TEXT(rd[[i]][[1]], ...), "\n:   ", to_rst.TEXT(rd[[i]][-1], ...))
+      li[i] <- stringr::str_c(":", to_rst.TEXT(rd[[i]][[1]], ...), ":\n    ", to_rst.TEXT(rd[[i]][-1], ...))
     } else {
       li[i] <- to_rst.TEXT(rd[i], ...)
     }

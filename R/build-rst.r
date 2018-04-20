@@ -80,7 +80,7 @@ build_rst_topics <- function(pkg=".", doc_path=NULL, ...) {
     rst$pagetitle <- rst$name
 
     rst$package <- pkg[c("package", "version")]
-    render_rst_page(pkg, "topic", rst, paths[[i]])
+    render_page(rst, style="sphinx", format="rst", path=paths[[i]])
     graphics.off()
 
     if ("internal" %in% rst$keywords) {

@@ -52,14 +52,11 @@ build_sphinx <- function(pkg=".", doc_path=NULL) {
     }
 
     pkg <- as.sd_package(pkg, site_path=doc_path, mathjax=FALSE)
-    #load_all(pkg)
 
-    pkg$topics <- build_md_topics(pkg, style=style)
+    pkg$topics <- build_rst_topics(pkg)
     pkg$vignettes <- build_md_vignettes(pkg)
-    # pkg$news <- build_md_news(pkg)
-    # pkg$index <- build_md_index(pkg)
-    #
-    # if (yaml) { build_yaml(pkg) }
+    pkg$news <- build_md_news(pkg)
+    pkg$index <- build_md_index(pkg)
 
     invisible(TRUE)
 }
@@ -109,7 +106,7 @@ build_md_topics <- function(pkg=".", doc_path=NULL, style=c("mkdocs", "sphinx"))
         md$pagetitle <- md$name
 
         md$package <- pkg[c("package", "version")]
-        render_md_page(md, style=style, path=paths[[i]])
+        render_page(md, style=style, format="md", path=paths[[i]])
         graphics.off()
 
         if ("internal" %in% md$keywords) {
