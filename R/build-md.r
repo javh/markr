@@ -19,23 +19,57 @@
 #' @import stringr
 #' @importFrom devtools load_all
 #' @export
-build_mkdocs <- function(pkg=".", doc_path=NULL, yaml=FALSE) {
-  # Make doc directory
-  if (!file.exists(doc_path)) {
-    dir.create(doc_path, recursive = TRUE)
-  }
+build_mkdocs <- function(pkg=".", doc_path=NULL, yaml=FALSE, style=c("mkdocs", "sphinx")) {
+    # Check arguments
+    style <- match.arg(style)
 
-  pkg <- as.sd_package(pkg, site_path=doc_path, mathjax=FALSE)
-  #load_all(pkg)
+    # Make doc directory
+    if (!file.exists(doc_path)) {
+        dir.create(doc_path, recursive = TRUE)
+    }
 
-  pkg$topics <- build_md_topics(pkg)
-  pkg$vignettes <- build_md_vignettes(pkg)
-  pkg$news <- build_md_news(pkg)
-  pkg$index <- build_md_index(pkg)
+    pkg <- as.sd_package(pkg, site_path=doc_path, mathjax=FALSE)
+    #load_all(pkg)
 
-  if (yaml) { build_yaml(pkg) }
+    pkg$topics <- build_md_topics(pkg, style=style)
+    pkg$vignettes <- build_md_vignettes(pkg)
+    pkg$news <- build_md_news(pkg)
+    pkg$index <- build_md_index(pkg)
 
-  invisible(TRUE)
+    if (yaml) { build_yaml(pkg) }
+
+    invisible(TRUE)
+}
+
+#' @export
+#' @importFrom   stringi    stri_join
+#'                          stri_replace_first stri_replace_last stri_replace_all
+run_pandoc <- function(doc_path=NULL, format="rst", delete=TRUE) {
+    # Make doc directory
+    if (!file.exists(doc_path)) {
+        dir.create(doc_path, recursive = TRUE)
+    }
+    md_files <- list.files(doc_path, '.md$', full.names=TRUE, recursive=TRUE)
+
+    # Base pandoc command
+    pandoc_cmd <- stri_join("pandoc -f markdown -t", format, sep=" ")
+
+    # Convert each file in the document path
+    pandoc_files <- character()
+    for (in_file in md_files) {
+        cat("Converting", basename(in_file), "to", format, "\n")
+        out_file <- stri_replace_last(in_file, 'rst', regex='md$')
+        cmd <- stri_join(pandoc_cmd, "-o", out_file, in_file, sep=" ")
+        system(cmd)
+        pandoc_files <- c(pandoc_files, out_file)
+    }
+
+    if (delete)
+    {
+        for (f in md_files) { file.remove(f) }
+    }
+
+    return(pandoc_files)
 }
 
 

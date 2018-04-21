@@ -11,6 +11,7 @@ Authors@R: c(person("Jason", "Vander Heiden", role=c("aut", "cre"),
 License: MIT
 Imports:
     stringr,
+    stringi,
     evaluate,
     whisker,
     highlight,
