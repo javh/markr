@@ -337,6 +337,8 @@ build_md_index <- function(pkg) {
   # Make author vector
   if (!is.null(pkg$`authors@r`)) {
     authors <- sapply(eval(parse(text=pkg$`authors@r`)), .make_person)
+  } else {
+      authors <- NULL
   }
 
   # Make dependency vector; x = pkg$dependencies list
@@ -359,10 +361,10 @@ build_md_index <- function(pkg) {
   }
 
   # Define dependencies
-  depends <- if (!is.null(pkg$dependencies)) {
-      .make_depends(pkg$dependencies)
+  if (!is.null(pkg$dependencies)) {
+      depends <- .make_depends(pkg$dependencies)
     } else {
-      NULL
+      depends <- NULL
     }
 
   # Parse CITATION file
@@ -392,13 +394,31 @@ build_md_index <- function(pkg) {
   #           "\nTopics\n==========\n",
   #           topics)
 
-  index <- c(readme,
-             "\nDependencies\n---------------\n",
-             str_c(depends, collapse="  \n"),
-             "\nAuthors\n---------------\n",
-             str_c(authors, collapse="  \n"),
-             "\nCiting\n---------------\n",
-             str_c(citation, collapse="\n"))
+  index <- readme
+
+  # Add citation section
+  if (!is.null(depends))
+  {
+      index <- c(index,
+                 "\nDependencies\n---------------\n",
+                 str_c(depends, collapse="  \n"))
+  }
+
+  # Add citation section
+  if (!is.null(authors))
+  {
+      index <- c(index,
+                 "\nAuthors\n---------------\n",
+                 str_c(authors, collapse="  \n"))
+  }
+
+    # Add citation section
+  if (!is.null(citation))
+  {
+      index <- c(index,
+                 "\nCiting\n---------------\n",
+                 str_c(citation, collapse="\n"))
+  }
 
   # Write
   writeLines(index, outfile)
