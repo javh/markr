@@ -33,8 +33,8 @@ build_mkdocs <- function(pkg=".", doc_path=NULL, yaml=FALSE, style=c("mkdocs", "
 
     pkg$topics <- build_md_topics(pkg, style=style)
     pkg$vignettes <- build_md_vignettes(pkg)
-    pkg$news <- build_md_news(pkg)
-    pkg$index <- build_md_index(pkg)
+    pkg$news <- build_md_news(pkg, style=style)
+    pkg$index <- build_md_index(pkg, style=style)
 
     if (yaml) { build_yaml(pkg) }
 
@@ -170,74 +170,77 @@ build_md_topics <- function(pkg=".", doc_path=NULL, style=c("mkdocs", "sphinx"))
 #' @importFrom tools file_path_sans_ext file_ext
 #' @import stringr
 #' @export
-build_md_vignettes <- function(pkg=".", doc_path=NULL,  ...) {
-  #load_all(pkg)
-  pkg <- as.sd_package(pkg, site_path=doc_path, mathjax=FALSE, ...)
-  vigns <- pkgVignettes(dir = pkg$path)
+build_md_vignettes <- function(pkg=".", doc_path=NULL,  strip_yaml=TRUE) {
+    #load_all(pkg)
+    pkg <- as.sd_package(pkg, site_path=doc_path, mathjax=FALSE)
+    vigns <- pkgVignettes(dir = pkg$path)
 
-  # Return if no vignettes
-  if (length(vigns$docs) == 0) return()
+    # Return if no vignettes
+    if (length(vigns$docs) == 0) return()
 
-  # Set and create output directory
-  outdir <- file.path(pkg$site_path, "vignettes");
-  if(!file.exists(outdir)) { dir.create(outdir) }
+    # Set and create output directory
+    outdir <- file.path(pkg$site_path, "vignettes");
+    if(!file.exists(outdir)) { dir.create(outdir) }
 
-  # Knits Rmd to markdown
-  .knit_md <- function(d) {
-    n <- file_path_sans_ext(basename(d))
-    outfile <- str_c(n, ".md")
-    if (file_ext(d) %in% c("Rmd", "rmd")) {
-      opts_knit$set(unnamed.chunk.label=n)
-      #opts_chunk$set(fig.path="figures/")
-      #rmarkdown::render(d, output_file=outfile, output_dir=o, intermediates_dir=o,
-      #                  md_document(variant="markdown", preserve_yaml=FALSE))
-      knit(d, output=outfile, quiet=FALSE, envir=globalenv())
-      return(outfile)
-    } else {
-      return(FALSE)
+    # Knits Rmd to markdown
+    .knit_md <- function(d) {
+        n <- file_path_sans_ext(basename(d))
+        outfile <- str_c(n, ".md")
+        if (file_ext(d) %in% c("Rmd", "rmd")) {
+            opts_knit$set(unnamed.chunk.label=n)
+            #opts_chunk$set(fig.path="figures/")
+            #rmarkdown::render(d, output_file=outfile, output_dir=o, intermediates_dir=o,
+            #                  md_document(variant="markdown", preserve_yaml=FALSE))
+            knit(d, output=outfile, quiet=FALSE, envir=globalenv())
+            return(outfile)
+        } else {
+            return(FALSE)
+        }
     }
-  }
 
-  # Set working directory for knit
-  wd = getwd()
-  setwd(outdir)
+    # Set working directory for knit
+    wd = getwd()
+    setwd(outdir)
 
-  # Knit vignettes
-  message("Building vignettes")
-  files <- sapply(vigns$docs, .knit_md)
+    # Knit vignettes
+    message("Building vignettes")
+    files <- sapply(vigns$docs, .knit_md)
 
-  # Reset working directory
-  setwd(wd)
+    # Reset working directory
+    setwd(wd)
 
-  # Extract titles
-  .get_title <- function(d) {
-    x <- str_c(readLines(d), collapse="\n")
-    str_match(x, "\\\\VignetteIndexEntry\\{(.*?)\\}")[2]
-  }
-  titles <- sapply(vigns$docs, .get_title, USE.NAMES=FALSE)
-
-  # Strip yaml block, because knitr ignores `preserve_yaml=FALSE` for some unknown reason
-  # Add title to output
-  for (i in 1:length(files)) {
-    f <- file.path(outdir, files[i])
-    header <- titles[i]
-    # Open outfile
-    x <- readLines(f)
-    # Remove yaml
-    y <- which(x == "---")
-    if (length(y) == 2) {
-      x <- x[-(y[1]:y[2])]
-    } else {
-      warning("Error finding yaml block. Not removed.")
+    # Extract titles
+    .get_title <- function(d) {
+        x <- str_c(readLines(d), collapse="\n")
+        str_match(x, "\\\\VignetteIndexEntry\\{(.*?)\\}")[2]
     }
-    # Add header
-    x <- c(header, "====================\n", x)
-    # Write modified file
+    titles <- sapply(vigns$docs, .get_title, USE.NAMES=FALSE)
 
-    writeLines(x, f)
-  }
+    # Add title to output
+    for (i in 1:length(files)) {
+        f <- file.path(outdir, files[i])
+        header <- titles[i]
+        # Open outfile
+        x <- readLines(f)
 
-  return(data.frame(title=titles, file_out=files, stringsAsFactors=FALSE))
+        # Strip yaml block, because knitr ignores `preserve_yaml=FALSE` for some unknown reason
+        if (strip_yaml) {
+            y <- which(x == "---")
+            if (length(y) == 2) {
+                x <- x[-(y[1]:y[2])]
+            } else {
+                warning("Error finding yaml block. Not removed.")
+            }
+        }
+
+        # Add header
+        x <- c(stri_join('# ', header), x)
+        # Write modified file
+
+        writeLines(x, f)
+    }
+
+    return(data.frame(title=titles, file_out=files, stringsAsFactors=FALSE))
 }
 
 #' Load README into a string vector
@@ -250,13 +253,13 @@ build_md_vignettes <- function(pkg=".", doc_path=NULL,  ...) {
 #'
 #' @export
 load_md_readme <- function(pkg = ".", ...) {
-  pkg <- as.sd_package(pkg, ...)
+    pkg <- as.sd_package(pkg, ...)
 
-  # Use README.md from package root if it exists, fall back to description if not
-  f <- file.path(pkg$path, "README.md")
-  readme <- if (file.exists(f)) { readLines(f) } else { pkg$description }
+    # Use README.md from package root if it exists, fall back to description if not
+    f <- file.path(pkg$path, "README.md")
+    readme <- if (file.exists(f)) { readLines(f) } else { pkg$description }
 
-  return(readme)
+    return(readme)
 }
 
 #' Load NEWS into a string vector
@@ -268,8 +271,8 @@ load_md_readme <- function(pkg = ".", ...) {
 #'   used to override package defaults.
 #'
 #' @export
-load_md_news <- function(pkg = ".", ...) {
-    pkg <- as.sd_package(pkg, ...)
+load_md_news <- function(pkg = ".") {
+    pkg <- as.sd_package(pkg)
 
     # Use NEWS.md from package root if it exists, otherwise NULL
     f <- file.path(pkg$path, "NEWS.md")
@@ -286,12 +289,19 @@ load_md_news <- function(pkg = ".", ...) {
 #' @param  pkg   path to source version of package.
 #'
 #' @export
-build_md_news <- function(pkg) {
+build_md_news <- function(pkg, style=c("mkdocs", "sphinx")) {
+    # Check arguments
+    style <- match.arg(style)
+
     outfile <- file.path(pkg$site_path, "news.md")
     message("Generating news.md")
 
     # Load NEWS
     news <- load_md_news(pkg)
+
+    if (style == "sphinx") {
+        news <- c("# Release Notes\n", news)
+    }
 
     # Write
     if (!is.null(news)) {
@@ -311,165 +321,179 @@ build_md_news <- function(pkg) {
 #' @param  pkg   path to source version of package.
 #'
 #' @export
-build_md_index <- function(pkg) {
-  outfile <- file.path(pkg$site_path, "index.md")
-  message("Generating index.md")
-
-  # Load README
-  readme <- load_md_readme(pkg)
-
-  # Make person link; x = eval'd Authors@R
-  .make_person <- function(x) {
-    s <- NULL
-    if (length(x$email))
-      s <- "["
-    if (length(x$given))
-      s <- str_c(s, x$given)
-    if (length(x$family))
-      s <- str_c(s, x$family, sep=" ")
-    if (length(x$email))
-      s <- str_c(s, "](mailto:", x$email, ")")
-    if (length(x$role))
-      s <- str_c(s, " (", paste(x$role, collapse=", "), ")")
-    return(s)
-  }
-
-  # Make author vector
-  if (!is.null(pkg$`authors@r`)) {
-    authors <- sapply(eval(parse(text=pkg$`authors@r`)), .make_person)
-  } else {
-      authors <- NULL
-  }
-
-  # Make dependency vector; x = pkg$dependencies list
-  .make_depends <- function(x) {
-    d <- NULL
-    if (length(x$depends)) {
-      d <- c(d, str_c("**Depends:**", x$depends, sep=" "))
-    }
-    if (length(x$imports)) {
-      d <- c(d, str_c("**Imports:**", x$imports, sep=" "))
-    }
-    if (length(x$suggests)) {
-      d <- c(d, str_c("**Suggests:**", x$suggests, sep=" "))
-    }
-    if (length(x$extends)) {
-      d <- c(d, str_c("**Extends:**", x$extends, sep=" "))
+build_md_index <- function(pkg, style=c("mkdocs", "sphinx")) {
+    # Check arguments
+    style <- match.arg(style)
+    if (style == "mkdocs") {
+        header_block <- c("# ", "\n")
+        outfile <- file.path(pkg$site_path, "index.md")
+        message("Generating index.md")
+    } else if (style == "sphinx") {
+        header_block <- c("## ", "\n")
+        outfile <- file.path(pkg$site_path, "about.md")
+        message("Generating about.md")
     }
 
-    return(d)
-  }
+    # Load README
+    readme <- load_md_readme(pkg)
 
-  # Define dependencies
-  if (!is.null(pkg$dependencies)) {
-      depends <- .make_depends(pkg$dependencies)
+    # Make person link; x = eval'd Authors@R
+    .make_person <- function(x) {
+        s <- NULL
+        if (length(x$email))
+            s <- "["
+        if (length(x$given))
+            s <- str_c(s, x$given)
+        if (length(x$family))
+            s <- str_c(s, x$family, sep=" ")
+        if (length(x$email))
+            s <- str_c(s, "](mailto:", x$email, ")")
+        if (length(x$role))
+            s <- str_c(s, " (", paste(x$role, collapse=", "), ")")
+        return(s)
+    }
+
+    # Make author vector
+    if (!is.null(pkg$`authors@r`)) {
+        authors <- sapply(eval(parse(text=pkg$`authors@r`)), .make_person)
     } else {
-      depends <- NULL
+        authors <- NULL
     }
 
-  # Parse CITATION file
-  cite_file <- file.path(pkg$path, "inst", "CITATION")
-  if (file.exists(cite_file)) {
-      x <- capture.output(readCitationFile(cite_file))
-      x <- str_c(x, collapse="\n")
-      citation <- str_replace_all(x, "<URL:\\s*(http://[^>]+)>", "[\\1](\\1)")
+    # Make dependency vector; x = pkg$dependencies list
+    .make_depends <- function(x) {
+        d <- NULL
+        if (length(x$depends)) {
+            d <- c(d, str_c("**Depends:**", x$depends, sep=" "))
+        }
+        if (length(x$imports)) {
+            d <- c(d, str_c("**Imports:**", x$imports, sep=" "))
+        }
+        if (length(x$suggests)) {
+            d <- c(d, str_c("**Suggests:**", x$suggests, sep=" "))
+        }
+        if (length(x$extends)) {
+            d <- c(d, str_c("**Extends:**", x$extends, sep=" "))
+        }
+
+        return(d)
+    }
+
+    # Define dependencies
+    if (!is.null(pkg$dependencies)) {
+        depends <- .make_depends(pkg$dependencies)
     } else {
-      citation <- NULL
+        depends <- NULL
     }
 
-  # Make vignette links
-  #vignettes <- mapply(function(x, y) { str_c("+ [", x, "](vignettes/", y, ")") },
-  #                    pkg$vignettes$title, pkg$vignettes$file_out, USE.NAMES=FALSE)
+    # Parse CITATION file
+    cite_file <- file.path(pkg$path, "inst", "CITATION")
+    if (file.exists(cite_file)) {
+        x <- capture.output(readCitationFile(cite_file))
+        x <- str_c(x, collapse="\n")
+        citation <- str_replace_all(x, "<URL:\\s*(http://[^>]+)>", "[\\1](\\1)")
+    } else {
+        citation <- NULL
+    }
 
-  # Exclude package docs from topics
-  #topic_table <- pkg$topics[pkg$topics$name != pkg$package, ]
-  # Make topic links
-  #topics <- mapply(function(x, y) { str_c("+ [", x, "](topics/", y, ")") },
-  #                 topic_table$name, topic_table$file_out, USE.NAMES=FALSE)
+    # Make vignette links
+    #vignettes <- mapply(function(x, y) { str_c("+ [", x, "](vignettes/", y, ")") },
+    #                    pkg$vignettes$title, pkg$vignettes$file_out, USE.NAMES=FALSE)
 
-  # Assemble index
-  #index <- c(readme,
-  #           "\nVignettes\n==========\n",
-  #           vignettes,
-  #           "\nTopics\n==========\n",
-  #           topics)
+    # Exclude package docs from topics
+    #topic_table <- pkg$topics[pkg$topics$name != pkg$package, ]
+    # Make topic links
+    #topics <- mapply(function(x, y) { str_c("+ [", x, "](topics/", y, ")") },
+    #                 topic_table$name, topic_table$file_out, USE.NAMES=FALSE)
 
-  index <- readme
+    # Assemble index
+    #index <- c(readme,
+    #           "\nVignettes\n==========\n",
+    #           vignettes,
+    #           "\nTopics\n==========\n",
+    #           topics)
 
-  # Add citation section
-  if (!is.null(depends))
-  {
-      index <- c(index,
-                 "\nDependencies\n---------------\n",
-                 str_c(depends, collapse="  \n"))
-  }
+    if (style == "sphinx") {
+        index <- c("# About\n", readme)
+    } else {
+        index <- readme
+    }
 
-  # Add citation section
-  if (!is.null(authors))
-  {
-      index <- c(index,
-                 "\nAuthors\n---------------\n",
-                 str_c(authors, collapse="  \n"))
-  }
 
     # Add citation section
-  if (!is.null(citation))
-  {
-      index <- c(index,
-                 "\nCiting\n---------------\n",
-                 str_c(citation, collapse="\n"))
-  }
+    if (!is.null(depends))
+    {
+        index <- c(index, "\n",
+                   stri_join(header_block[1], "Dependencies", header_block[2]),
+                   str_c(depends, collapse="  \n"))
+    }
 
-  # Write
-  writeLines(index, outfile)
+    # Add citation section
+    if (!is.null(authors))
+    {
+        index <- c(index, "\n",
+                   stri_join(header_block[1], "Authors", header_block[2]),
+                   str_c(authors, collapse="  \n"))
+    }
 
-  invisible(outfile)
+    # Add citation section
+    if (!is.null(citation))
+    {
+        index <- c(index, "\n",
+                   stri_join(header_block[1], "Citing", header_block[2]),
+                   str_c(citation, collapse="\n"))
+    }
+
+    # Write
+    writeLines(index, outfile)
+
+    invisible(outfile)
 }
 
 #' @export
 build_yaml <- function(pkg) {
-  # Spacer
-  i <- "  "
+    # Spacer
+    i <- "  "
 
-  # Default options
-  yaml <- c(str_c("site_name: ", pkg$package),
-            "theme: readthedocs",
-            "markdown_extensions:",
-            str_c(i, "- def_list"),
-            str_c(i, "- sane_lists"),
-            str_c(i, "- smarty"),
-            str_c(i, "- toc:"),
-            str_c(i, i, i, "permalink: True"),
-            str_c("docs_dir: ", basename(pkg$site_path)),
-            "pages:",
-            str_c(i, "- 'About':"),
-            str_c(i, i, "- 'Introduction': index.md"),
-            str_c(i, i, "- 'Package Overview': topics/", pkg$package, ".md"))
+    # Default options
+    yaml <- c(str_c("site_name: ", pkg$package),
+              "theme: readthedocs",
+              "markdown_extensions:",
+              str_c(i, "- def_list"),
+              str_c(i, "- sane_lists"),
+              str_c(i, "- smarty"),
+              str_c(i, "- toc:"),
+              str_c(i, i, i, "permalink: True"),
+              str_c("docs_dir: ", basename(pkg$site_path)),
+              "pages:",
+              str_c(i, "- 'About':"),
+              str_c(i, i, "- 'Introduction': index.md"),
+              str_c(i, i, "- 'Package Overview': topics/", pkg$package, ".md"))
 
-  # Add NEWS if it exists
-  if (!is.null(pkg$news)) {
-      yaml <- c(yaml, str_c(i, i, "- 'Release Notes': news.md"))
-  }
+    # Add NEWS if it exists
+    if (!is.null(pkg$news)) {
+        yaml <- c(yaml, str_c(i, i, "- 'Release Notes': news.md"))
+    }
 
-  # Add vignettes
-  vignettes <- mapply(function(x, y) { str_c(i, i, "- '", x, "': ", file.path("vignettes", y)) },
-                      pkg$vignettes$title, pkg$vignettes$file_out)
+    # Add vignettes
+    vignettes <- mapply(function(x, y) { str_c(i, i, "- '", x, "': ", file.path("vignettes", y)) },
+                        pkg$vignettes$title, pkg$vignettes$file_out)
 
-  # Exclude package docs from topics
-  topic_table <- pkg$topics[pkg$topics$name != pkg$package, ]
-  # Add topics
-  topics <- sapply(topic_table$file_out, function(x) { str_c(i, i, "- ", file.path("topics", x)) })
+    # Exclude package docs from topics
+    topic_table <- pkg$topics[pkg$topics$name != pkg$package, ]
+    # Add topics
+    topics <- sapply(topic_table$file_out, function(x) { str_c(i, i, "- ", file.path("topics", x)) })
 
-  if (length(vignettes) > 0) {
+    if (length(vignettes) > 0) {
+        yaml <- c(yaml,
+                  str_c(i, "- 'Vignettes':"),
+                  vignettes)
+    }
+
     yaml <- c(yaml,
-              str_c(i, "- 'Vignettes':"),
-              vignettes)
-  }
-
-  yaml <- c(yaml,
-            str_c(i, "- 'Help Topics':"),
-            topics)
+              str_c(i, "- 'Help Topics':"),
+              topics)
 
 
-  writeLines(yaml, file.path(pkg$site_path, "..", "mkdocs.yml"))
+    writeLines(yaml, file.path(pkg$site_path, "..", "mkdocs.yml"))
 }
