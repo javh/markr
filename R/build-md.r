@@ -243,6 +243,35 @@ build_md_vignettes <- function(pkg=".", doc_path=NULL,  strip_yaml=TRUE) {
     return(data.frame(title=titles, file_out=files, stringsAsFactors=FALSE))
 }
 
+
+#' #' @importFrom tools pkgVignettes buildVignettes
+#' build_vignettes <- function(pkg = ".") {
+#'     pkg <- as.sd_package(pkg)
+#'     vigns <- pkgVignettes(dir = pkg$path)
+#'
+#'     if (length(vigns$docs) == 0) return()
+#'
+#'     message("Building vignettes")
+#'     # Locate source and built versions of vignettes
+#'     buildVignettes(dir = pkg$path)
+#'     vigns <- pkgVignettes(dir = pkg$path, output = TRUE)
+#'
+#'     message("Copying vignettes")
+#'     dest <- file.path(pkg$site_path, "vignettes")
+#'     if (!file.exists(dest)) dir.create(dest)
+#'     file.copy(vigns$outputs, dest, overwrite = TRUE)
+#'
+#'     # Extract titles
+#'     titles <- vapply(vigns$docs, FUN.VALUE = character(1), function(x) {
+#'         contents <- str_c(readLines(x), collapse = "\n")
+#'         str_match(contents, "\\\\VignetteIndexEntry\\{(.*?)\\}")[2]
+#'     })
+#'     names <- basename(vigns$outputs)
+#'
+#'     list(vignette = unname(Map(list, title = titles, filename = names)))
+#' }
+
+
 #' Load README into a string vector
 #'
 #' @param pkg path to source version of package.  See

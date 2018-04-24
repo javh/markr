@@ -29,7 +29,6 @@ as.sd_package <- function(pkg = ".", site_path = NULL, examples = NULL,
   pkg$sd_path <- pkg_sd_path(pkg, site_path = site_path)
 
   pkg$index <- load_index(pkg)
-  pkg$icons <- load_icons(pkg)
 
   settings <- load_settings(pkg)
   pkg$site_path <- site_path %||% settings$site_path %||% "inst/web"
