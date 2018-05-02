@@ -62,6 +62,11 @@ run_pandoc <- function(doc_path=NULL, format="rst", delete=TRUE) {
         cmd <- stri_join(pandoc_cmd, "-o", out_file, in_file, sep=" ")
         system(cmd)
         pandoc_files <- c(pandoc_files, out_file)
+
+        # Fix links
+        in_text  <- readLines(out_file)
+        out_text  <- stri_replace_all(in_text, ".html>", fixed=".md>")
+        writeLines(out_text, con=out_file)
     }
 
     if (delete)
