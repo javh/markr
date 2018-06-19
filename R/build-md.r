@@ -490,19 +490,23 @@ build_yaml <- function(pkg) {
     i <- "  "
 
     # Default options
-    yaml <- c(str_c("site_name: ", pkg$package),
-              "theme: readthedocs",
+    yaml <- c("theme: readthedocs",
+              str_c("site_name: ", pkg$package),
+              str_c("docs_dir: ", basename(pkg$site_path)),
               "markdown_extensions:",
               str_c(i, "- def_list"),
               str_c(i, "- sane_lists"),
               str_c(i, "- smarty"),
+              str_c(i, "- pymdownx.arithmatex"),
               str_c(i, "- toc:"),
               str_c(i, i, i, "permalink: True"),
-              str_c("docs_dir: ", basename(pkg$site_path)),
+              "extra_javascript:",
+              str_c(i, "- https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"),
               "pages:",
               str_c(i, "- 'About':"),
               str_c(i, i, "- 'Introduction': index.md"),
               str_c(i, i, "- 'Package Overview': topics/", pkg$package, ".md"))
+
 
     # Add NEWS if it exists
     if (!is.null(pkg$news)) {
