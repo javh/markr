@@ -1,12 +1,7 @@
-#' Build complete mkdocs documentation for a package.
+#' Build complete MkDocs site
 #'
-#' Currently, build_mkdocs builds documentation for:
-#' \itemize{
-#'   \item The package DESCRIPTION
-#'   \item Help topics
-#'   \item Vignettes
-#'   \item README.md files
-#' }
+#' Builds a complete MkDocs site for a package from the package's man pages, vignettes,
+#' DESCRIPTION, README.md, NEWS.md and inst/CITATION files.
 #'
 #' @param  pkg        path to source version of package.  See
 #'                    \link[devtools]{as.package} for details on how paths and package
@@ -79,7 +74,6 @@ run_pandoc <- function(doc_path=NULL, format="rst", delete=TRUE) {
 
 
 #' Build complete sphinx (recommonmark) documentation for a package.
-#'
 #' @export
 build_sphinx <- function(pkg=".", doc_path=NULL) {
     # Check arguments
@@ -104,11 +98,11 @@ build_sphinx <- function(pkg=".", doc_path=NULL) {
 #' Generate all topic pages for a package.
 #'
 #' @param pkg path to source version of package.  See
-#'   \code{\link[devtools]{as.package}} for details on how paths and package
+#'   \link[devtools]{as.package} for details on how paths and package
 #'   names are resolved.
 #' @param  doc_path   directory in which to create documentation. If
 #'                    \code{NULL} this defaults to \code{pkg}/docs.
-#' @param ... Other additional arguments passed to \code{\link{as.sd_package}}
+#' @param ... Other additional arguments passed to \link{as.sd_package}
 #'   used to override package defaults.
 #'
 #' @export
@@ -161,11 +155,11 @@ build_md_topics <- function(pkg=".", doc_path=NULL, style=c("mkdocs", "sphinx"))
 #' Knit markdown vignettes
 #'
 #' @param  pkg path to source version of package.  See
-#'   \code{\link[devtools]{as.package}} for details on how paths and package
+#'   \link[devtools]{as.package} for details on how paths and package
 #'   names are resolved.
 #' @param  doc_path   directory in which to create documentation. If
 #'                    \code{NULL} this defaults to \code{pkg}/docs.
-#' @param ... Other additional arguments passed to \code{\link{as.sd_package}}
+#' @param ... Other additional arguments passed to \link{as.sd_package}
 #'   used to override package defaults.
 #'
 #' @importFrom tools pkgVignettes buildVignettes
@@ -249,41 +243,43 @@ build_md_vignettes <- function(pkg=".", doc_path=NULL,  strip_yaml=TRUE) {
 }
 
 
-#' #' @importFrom tools pkgVignettes buildVignettes
-#' build_vignettes <- function(pkg = ".") {
-#'     pkg <- as.sd_package(pkg)
-#'     vigns <- pkgVignettes(dir = pkg$path)
-#'
-#'     if (length(vigns$docs) == 0) return()
-#'
-#'     message("Building vignettes")
-#'     # Locate source and built versions of vignettes
-#'     buildVignettes(dir = pkg$path)
-#'     vigns <- pkgVignettes(dir = pkg$path, output = TRUE)
-#'
-#'     message("Copying vignettes")
-#'     dest <- file.path(pkg$site_path, "vignettes")
-#'     if (!file.exists(dest)) dir.create(dest)
-#'     file.copy(vigns$outputs, dest, overwrite = TRUE)
-#'
-#'     # Extract titles
-#'     titles <- vapply(vigns$docs, FUN.VALUE = character(1), function(x) {
-#'         contents <- str_c(readLines(x), collapse = "\n")
-#'         str_match(contents, "\\\\VignetteIndexEntry\\{(.*?)\\}")[2]
-#'     })
-#'     names <- basename(vigns$outputs)
-#'
-#'     list(vignette = unname(Map(list, title = titles, filename = names)))
-#' }
+# @importFrom tools pkgVignettes buildVignettes
+# build_vignettes <- function(pkg = ".") {
+#     pkg <- as.sd_package(pkg)
+#     vigns <- pkgVignettes(dir = pkg$path)
+#
+#     if (length(vigns$docs) == 0) return()
+#
+#     message("Building vignettes")
+#     # Locate source and built versions of vignettes
+#     buildVignettes(dir = pkg$path)
+#     vigns <- pkgVignettes(dir = pkg$path, output = TRUE)
+#
+#     message("Copying vignettes")
+#     dest <- file.path(pkg$site_path, "vignettes")
+#     if (!file.exists(dest)) dir.create(dest)
+#     file.copy(vigns$outputs, dest, overwrite = TRUE)
+#
+#     # Extract titles
+#     titles <- vapply(vigns$docs, FUN.VALUE = character(1), function(x) {
+#         contents <- str_c(readLines(x), collapse = "\n")
+#         str_match(contents, "\\\\VignetteIndexEntry\\{(.*?)\\}")[2]
+#     })
+#     names <- basename(vigns$outputs)
+#
+#     list(vignette = unname(Map(list, title = titles, filename = names)))
+# }
 
 
-#' Load README into a string vector
+#' Load README
 #'
-#' @param pkg path to source version of package.  See
-#'   \code{\link[devtools]{as.package}} for details on how paths and package
-#'   names are resolved.
-#' @param ... Other additional arguments passed to \code{\link{as.sd_package}}
-#'   used to override package defaults.
+#' Loads the README.md file for the package into a string vector.
+#'
+#' @param pkg   path to source version of package.  See
+#'              \link[devtools]{as.package} for details on how paths and package
+#'              names are resolved.
+#' @param ...   Other additional arguments passed to \link{as.sd_package}
+#'              used to override package defaults.
 #'
 #' @export
 load_md_readme <- function(pkg = ".", ...) {
@@ -299,9 +295,9 @@ load_md_readme <- function(pkg = ".", ...) {
 #' Load NEWS into a string vector
 #'
 #' @param pkg path to source version of package.  See
-#'   \code{\link[devtools]{as.package}} for details on how paths and package
+#'   \link[devtools]{as.package} for details on how paths and package
 #'   names are resolved.
-#' @param ... Other additional arguments passed to \code{\link{as.sd_package}}
+#' @param ... Other additional arguments passed to \link{as.sd_package}
 #'   used to override package defaults.
 #'
 #' @export

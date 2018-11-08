@@ -1,14 +1,3 @@
-#' @importFrom devtools dev_meta
-inst_path <- function() {
-  if (is.null(dev_meta("markr"))) {
-    # staticdocs is probably installed
-    system.file(package = "markr")
-  } else {
-    # staticdocs was probably loaded with devtools
-    file.path(getNamespaceInfo("markr", "path"), "inst")
-  }
-}
-
 # Return the staticdocs path for a package
 # Could be in pkgdir/inst/staticdocs/ (for non-installed source packages)
 # or in pkgdir/staticdocs/ (for installed packages)
