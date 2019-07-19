@@ -420,7 +420,7 @@ build_md_index <- function(pkg, style=c("mkdocs", "sphinx")) {
     cite_file <- file.path(pkg$path, "inst", "CITATION")
     if (file.exists(cite_file)) {
         x <- capture.output(readCitationFile(cite_file))
-        x <- x[!grepl("(bibtex=TRUE)|(citation.bibtex.max)", x)]
+        x <- x[!grepl("(To see these entries in BibTeX format)|(bibtex=TRUE)|(citation.bibtex.max)", x)]
         x <- str_c(x, collapse="\n")
         citation <- str_replace_all(x, "<URL:\\s*(http://[^>]+)>", "[\\1](\\1)")
     } else {
