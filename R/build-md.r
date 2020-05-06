@@ -402,9 +402,9 @@ build_md_index <- function(pkg, style=c("mkdocs", "sphinx")) {
         if (length(x$suggests)) {
             d <- c(d, str_c("**Suggests:**", x$suggests, sep=" "))
         }
-        if (length(x$extends)) {
-            d <- c(d, str_c("**Extends:**", x$extends, sep=" "))
-        }
+        # if (length(x$extends)) {
+        #     d <- c(d, str_c("**Extends:**", x$extends, sep=" "))
+        # }
 
         return(d)
     }
@@ -475,6 +475,13 @@ build_md_index <- function(pkg, style=c("mkdocs", "sphinx")) {
                    str_c(citation, collapse="\n"))
     }
 
+    # Add license section
+    if (length(pkg$license)) {
+        index <- c(index, "\n",
+                   stri_join(header_block[1], "License", header_block[2]),
+                   pkg$license)
+    }
+    
     # Write
     writeLines(index, outfile)
 
