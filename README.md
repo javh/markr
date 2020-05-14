@@ -1,12 +1,12 @@
 # Markr
 
 This is a fork of [staticdocs](https://github.com/hadley/staticdocs) with some bits from [readthedocs](https://github.com/sahilseth/readthedocs) to render output suitable for 
-input to [MkDocs](http://www.mkdocs.org).
+input to [MkDocs](http://www.mkdocs.org) or [Sphinx](https://www.sphinx-doc.org).
 
 ## Installation
 
 ```
-devtools::install_bitbucket("javh/markr@default")
+devtools::install_github("javh/markr")
 ```
 
 ## What it does
