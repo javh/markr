@@ -52,7 +52,7 @@ select "MkDocs" as the documentation type within settings
 
 These [docs](http://alakazam.readthedocs.org)  
 Are built from this [repo](https://bitbucket.org/kleinstein/alakazam)  
-Whose docs are built from [these commands](https://bitbucket.org/kleinstein/alakazam/src/master/inst/markr/build.R)  
+Whose docs are built from [these commands](https://bitbucket.org/kleinstein/alakazam/src/master/docs/build.R)  
 Supplemented with one manually created [file](https://bitbucket.org/kleinstein/alakazam/src/master/docs/install.md)
 
 ## Limitations
