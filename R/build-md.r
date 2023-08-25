@@ -127,6 +127,8 @@ build_md_topics <- function(pkg=".", doc_path=NULL, style=c("mkdocs", "sphinx"))
     # create columns for extra topic info
     index$title <- ""
     index$in_index <- TRUE
+    
+    pkg_name <- pkg$package
 
     for (i in seq_along(index$name)) {
         message("Generating ", basename(paths[[i]]))
@@ -139,8 +141,15 @@ build_md_topics <- function(pkg=".", doc_path=NULL, style=c("mkdocs", "sphinx"))
         md$pagetitle <- md$name
 
         md$package <- pkg[c("package", "version")]
+        
         render_page(md, style=style, format="md", path=paths[[i]])
         graphics.off()
+        
+        if (index$name[i] == pkg_name & style =="mkdocs") {
+            message("hacking package md")
+            text <- paste0(c("# \n", readLines(paths[[i]])), sep="", collapse = "\n")
+            cat( text, file=paths[[i]], append = F)
+        }
 
         if ("internal" %in% md$keywords) {
             index$in_index[i] <- FALSE
@@ -331,6 +340,8 @@ build_md_news <- function(pkg, style=c("mkdocs", "sphinx")) {
 
     if (style == "sphinx") {
         news <- c("# Release Notes\n", news)
+    } else {
+        news <- c("# \n", news)
     }
 
     # Write
@@ -355,18 +366,25 @@ build_md_index <- function(pkg, style=c("mkdocs", "sphinx")) {
     # Check arguments
     style <- match.arg(style)
     if (style == "mkdocs") {
-        header_block <- c("# ", "\n")
+        header_block <- c("## ", "\n")
         outfile <- file.path(pkg$site_path, "index.md")
         message("Generating index.md")
     } else if (style == "sphinx") {
-        header_block <- c("## ", "\n")
+        header_block <- c("# ", "\n")
         outfile <- file.path(pkg$site_path, "about.md")
         message("Generating about.md")
     }
 
     # Load README
     readme <- load_md_readme(pkg)
-
+    
+    if (style == "mkdocs") {
+        # Add missing h1
+        if (!grepl("^-+$",readme[2])) {
+            readme <- c("# ","",readme)
+        }        
+    } 
+    
     # Make person link; x = eval'd Authors@R
     .make_person <- function(x) {
         s <- NULL
