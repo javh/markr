@@ -146,8 +146,9 @@ build_md_topics <- function(pkg=".", doc_path=NULL, style=c("mkdocs", "sphinx"))
         graphics.off()
         
         if (index$name[i] == pkg_name & style =="mkdocs") {
-            message("hacking package md")
-            text <- paste0(c("# \n", readLines(paths[[i]])), sep="", collapse = "\n")
+            text <- readLines(paths[[i]])
+            text[1] <- paste0("# ",gsub(".* \\*(.*)\\*","\\1",text[1]))
+            text <- paste(text, sep="", collapse = "\n")
             cat( text, file=paths[[i]], append = F)
         }
 
@@ -341,7 +342,7 @@ build_md_news <- function(pkg, style=c("mkdocs", "sphinx")) {
     if (style == "sphinx") {
         news <- c("# Release Notes\n", news)
     } else {
-        news <- c("# \n", news)
+        news <- c("# Release Notes\n", news)
     }
 
     # Write
@@ -379,9 +380,16 @@ build_md_index <- function(pkg, style=c("mkdocs", "sphinx")) {
     readme <- load_md_readme(pkg)
     
     if (style == "mkdocs") {
-        # Add missing h1
+        # Update readme:
+        # - add missing h1
+        # - put badges in one line
         if (!grepl("^-+$",readme[2])) {
-            readme <- c("# ","",readme)
+            #readme <- c("#","",readme)
+            badges_idx <- grepl("^[![]", readme)
+            readme_0 <- paste(readme[badges_idx], collapse = " ")
+            readme_0 <- paste0("# ", readme_0)
+            readme <- readme[!badges_idx]
+            readme <- c(readme_0,readme)
         }        
     } 
     
