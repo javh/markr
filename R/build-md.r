@@ -385,7 +385,7 @@ build_md_index <- function(pkg, style=c("mkdocs", "sphinx")) {
         # - put badges in one line
         if (!grepl("^-+$",readme[2])) {
             #readme <- c("#","",readme)
-            badges_idx <- grepl("^[![]", readme)
+            badges_idx <- grepl("^\\[!\\[\\]", readme)
             readme_0 <- paste(readme[badges_idx], collapse = " ")
             readme_0 <- paste0("# ", readme_0)
             readme <- readme[!badges_idx]
